@@ -1,29 +1,12 @@
 
-var pos;
-var prev;
-
-let hrTable;
-let weatherTable;
-let heart_rate = [];
-let weather_data = [];
-//let HoursInMonth = 720;
-const HoursInMonth = 400;
-
-//res 1920×1080
 const canvasWidth = 1920;
 const canvasHeight = 1000;
-
+//1920×1080
 
 let dCanvas = [];
 let gridCanvas;
 
 const numberOfDays = 30;
-
-function preload()
-{
-   hrTable = loadTable('assets/heart_rate.csv', 'csv', 'header');
-   weatherTable = loadTable('assets/berlin 2023-11-01 to 2023-11-30.csv', 'csv', 'header');
-}
 
 function setup() 
 {
@@ -36,10 +19,10 @@ function setup()
   for(let i = 0 ; i < numberOfDays; i++)
   {
     dCanvas[i] = createGraphics(320, 216 );
-    //dCanvas[i].background(8 * i);
+    dCanvas[i].background(8 * i);
   }
 
-  frameRate(60);
+  frameRate(10);
   //noLoop();
   //blendMode(BLEND )
   filter(BLUR );
@@ -83,6 +66,8 @@ function setup()
 
 }
 
+let angle = 0;
+let angle2 = 0;
 function draw()
 {
 
@@ -92,7 +77,7 @@ function draw()
   colorMode(HSB, 360, 100, 100, 1)
 
   createGrid();
-  //image(gridCanvas, 0, 0)
+  image(gridCanvas, 0, 0)
   
   let i = 0;
   for (var y = 0; y < height; y += height / 5) {
@@ -115,14 +100,57 @@ function draw()
       dCanvas[i].rectMode(CENTER)
       dCanvas[i].rect( changeX+320/2,changeY+216/2, 100, 80);
 
+      //let posX = x + ((x + width / 6) - x ) / 2;
+      //let posX = x + width / 12;
+      //let posY = y + height / 10;
+      //console.log(posX , posY );
+      //dCanvas[i].rect( 500 , 500, 50, 30);
+      //imageMode(CENTER);
       image(dCanvas[i], x ,y )
       i++;
 
 		}
 	}
 
+  /*
+  for( let i =0 ; i < numberOfDays ; i++)
+  {
 
-  //image(gridCanvas, 0,0)
+  dCanvas[i].fill(111+(i*2),23 + (i*3),45 + (i/2));
+  //translate(13 * i + 26 , 13);
+  //rotate(angle)
+  dCanvas[i].rect(0, 0, 20, 20);
+
+  //let change = map(mouseX, 0 , width, -5,5);
+  //image(dCanvas[i], 0 + i * 30 + change, 0)
+  image(dCanvas[i], 0 + i * 30 , 0)
+
+  }
+  */
+  //imageMode(CORNERS);
+  image(gridCanvas, 0,0)
+  
+  return;
+
+  for( let i =0 ; i < 6 ; i++)
+  {
+  push();
+  fill(111,23,45);
+  translate(13 * i + 26 , 13);
+  //rotate(angle)
+  rect(0, 0, 20, 20);
+  angle += 30;
+
+  pop();
+  }
+
+  push();
+  fill(11,213,75);
+  translate(300, 300);
+  rotate(angle2)
+  angle2 += 10
+  rect(0, 0, 100, 50);
+  pop();
  
 }
 
