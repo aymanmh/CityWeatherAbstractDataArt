@@ -4,45 +4,78 @@ var prev;
 
 let hrTable;
 let weatherTable;
+let stepsTable;
+let stepsData = [];
 let heart_rate = [];
 let weather_data = [];
-//let HoursInMonth = 720;
-const HoursInMonth = 400;
-
+let pause = false;
 //res 1920×1080
 const canvasWidth = 1920;
-const canvasHeight = 1000;
+const canvasHeight = 1080;
 
+const dayCanvasWidth = 320;
+const dayCanvasHeight = 216;
 
 let dCanvas = [];
+let days = [];
 let gridCanvas;
+
+let sel;
 
 const numberOfDays = 30;
 
 function preload()
 {
-   hrTable = loadTable('assets/heart_rate.csv', 'csv', 'header');
+   hrTable = loadTable('assets/avg_hr.csv', 'csv', 'header');
    weatherTable = loadTable('assets/berlin 2023-11-01 to 2023-11-30.csv', 'csv', 'header');
+   stepsTable = loadTable('assets/steps.csv', 'csv', 'header');
 }
 
 function setup() 
 {
+  let resetButton = createButton('Reset');
+  let pauseButton = createButton('Pause');
+
+  resetButton.mousePressed(resetSketch);
+  pauseButton.mousePressed(pauseSketch);
+
+  colorMode(HSB, 360, 100, 100, 1)
 	createCanvas(canvasWidth, canvasHeight);
-  angleMode(DEGREES);
-  background(51);
+  //angleMode(DEGREES);
+  background(20);
 
   gridCanvas = createGraphics(canvasWidth, canvasHeight );
 
-  for(let i = 0 ; i < numberOfDays; i++)
+
+
+  frameRate(25);
+  //noLoop();
+  //filter(BLUR );
+
+  for (let d = 0; d < 30; d++)
   {
-    dCanvas[i] = createGraphics(320, 216 );
-    //dCanvas[i].background(8 * i);
+    let stepsObject = {};
+    stepsObject.time = new Date(stepsTable.getString(d, 0));
+    stepsObject.steps = stepsTable.getNum(d, 1);
+
+    stepsData[d] = stepsObject;
+
   }
 
-  frameRate(60);
-  //noLoop();
-  //blendMode(BLEND )
-  filter(BLUR );
+
+  for (let r = 0; r < hrTable.getRowCount(); r++)
+  //for (let r = 0; r < 5; r++)
+  {
+    let hr_object = {};
+    hr_object.time = new Date(hrTable.getString(r, 0));
+    hr_object.hr = hrTable.getNum(r, 1);
+
+    heart_rate[r] = hr_object;
+  }
+
+
+  resetSketch();
+  //calculateHrAvg()
   return;
   //count the columns
   print(hrTable.getRowCount() + ' total rows in hrTable');
@@ -86,11 +119,10 @@ function setup()
 function draw()
 {
 
-  background(51);
-  
-  let orangeValue = 20;
-  colorMode(HSB, 360, 100, 100, 1)
 
+
+  background(20);
+  
   createGrid();
   //image(gridCanvas, 0, 0)
   
@@ -100,22 +132,14 @@ function draw()
       //let i = x + x * y;
       //console.log( dCanvas[i]);
       //dCanvas[i].background(8 * i);
-      var n1 = noise(1+x*0.005+millis()/1000)
-      var n2 = noise(y*0.005-millis()/1000)
-      
-      //dCanvas[i].fill(111+(i*2 * n1),23 + (i*3*n2),45 + (i/(2+n1+n2)));
-      dCanvas[i]. fill(0 + i*20*(n1+n2),100,100);
-      //var n = noise(x*0.005+millis()/1000,y*0.005)
-      //console.log(n);
-      let changeX = map(n1, 0 , 1,  -160,160);
-      //console.log(changeX);
-      //let changeX = map(mouseX, 0 , width, -160,160);
-      let changeY = map(n2, 0 , 1, -108,108);
-      //let changeY = map(mouseY, 0 , height, -108,108);
-      dCanvas[i].rectMode(CENTER)
-      dCanvas[i].rect( changeX+320/2,changeY+216/2, 100, 80);
 
-      image(dCanvas[i], x ,y )
+      //let changeY = map(mouseY, 0 , height, -108,108);
+      //dCanvas[i].rectMode(CENTER)
+      //dCanvas[i].rect( changeX+320/2,changeY+216/2, 100, 80);
+      //days[i].draw(i);
+      days[i].draw2(i,x,y);
+      
+      //image(days[i].canvas, x ,y )
       i++;
 
 		}
@@ -137,4 +161,59 @@ function createGrid()
 			gridCanvas.line(0, y, width, y);
 		}
 	}
+}
+
+function calculateHrAvg()
+{
+  let exampleTable = new p5.Table(); 
+  exampleTable.addColumn("time_stamp"); 
+  exampleTable.addColumn("avg_hr"); 
+
+  let sum = 0;
+  let noOfEntries = 0;
+  for(let i = 0 ; i < heart_rate.length ; i++)
+  {
+    let avg = 0;
+    let hour = heart_rate[i].time.getHours();
+    
+    sum += heart_rate[i].hr;
+    noOfEntries++;
+    
+    if(i+1 >= heart_rate.length || heart_rate[i+1].time.getHours() != hour)
+    {
+      avg = round(sum / noOfEntries);
+      //console.log(heart_rate[i].time, avg , sum , noOfEntries)
+      let newRow = exampleTable.addRow(); 
+      newRow.setString("time_stamp", heart_rate[i].time);
+      newRow.setNum("avg_hr", avg);
+      sum = 0;
+      noOfEntries = 0;
+    }
+
+  }
+  save(exampleTable, "c:/tool/test.csv");
+}
+
+function keyPressed() {
+  if (keyCode  === 80) {
+    pauseSketch()
+  }  
+}
+
+function resetSketch()
+{
+  days = [];
+  for(let i = 0 ; i < numberOfDays; i++)
+  {
+    days[i] = new Day(dayCanvasWidth, dayCanvasHeight,stepsData[i].steps, heart_rate.slice(i*24, (i*24)+24));
+  }
+}
+
+function pauseSketch()
+{
+  pause = !pause;
+   if(pause)
+    noLoop();
+  else
+    loop();
 }
