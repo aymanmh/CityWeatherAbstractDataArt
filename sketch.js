@@ -9,6 +9,8 @@ let stepsData = [];
 let heart_rate = [];
 let weather_data = [];
 let pause = false;
+let showGrid = false;
+let checkBox; 
 //res 1920×1080
 const canvasWidth = 1920;
 const canvasHeight = 1080;
@@ -22,24 +24,34 @@ let gridCanvas;
 
 let sel;
 
+let dropdown
+let resetButton
 const numberOfDays = 30;
 
 function preload()
 {
-   hrTable = loadTable('assets/avg_hr.csv', 'csv', 'header');
-   weatherTable = loadTable('assets/berlin 2023-11-01 to 2023-11-30.csv', 'csv', 'header');
-   stepsTable = loadTable('assets/steps.csv', 'csv', 'header');
+   hrTable = loadTable('assets/berlinAvgHR.csv', 'csv', 'header');
+   weatherTable = loadTable('assets/berlin.csv', 'csv', 'header');
+   stepsTable = loadTable('assets/berlinSteps.csv', 'csv', 'header');
 }
 
 function setup() 
 {
-  let resetButton = createButton('Reset');
+  resetButton = createButton('Reset');
   let pauseButton = createButton('Pause');
 
   resetButton.mousePressed(resetSketch);
   pauseButton.mousePressed(pauseSketch);
 
-  colorMode(HSB, 360, 100, 100, 1)
+  dropdown = createSelect(); 
+  dropdown.option("berlin"); 
+  dropdown.option("sydney"); 
+  dropdown.changed(changeData);
+
+  checkbox = createCheckbox('Show Grid', showGrid);
+  checkbox.changed( () => { showGrid = !showGrid; } );
+
+  colorMode(HSB, 360, 100, 100, 100)
 	createCanvas(canvasWidth, canvasHeight);
   //angleMode(DEGREES);
   background(20);
@@ -48,106 +60,32 @@ function setup()
 
 
 
-  frameRate(25);
+  frameRate(50);
   //noLoop();
   //filter(BLUR );
-
-  for (let d = 0; d < 30; d++)
-  {
-    let stepsObject = {};
-    stepsObject.time = new Date(stepsTable.getString(d, 0));
-    stepsObject.steps = stepsTable.getNum(d, 1);
-
-    stepsData[d] = stepsObject;
-
-  }
-
-
-  for (let r = 0; r < hrTable.getRowCount(); r++)
-  //for (let r = 0; r < 5; r++)
-  {
-    let hr_object = {};
-    hr_object.time = new Date(hrTable.getString(r, 0));
-    hr_object.hr = hrTable.getNum(r, 1);
-
-    heart_rate[r] = hr_object;
-  }
-
 
   resetSketch();
   //calculateHrAvg()
   return;
-  //count the columns
-  print(hrTable.getRowCount() + ' total rows in hrTable');
-  print(hrTable.getColumnCount() + ' total columns in hrTable');
-
-  //cycle through the hrTable
-  //for (let r = 0; r < hrTable.getRowCount(); r++)
-  for (let r = 0; r < 5; r++)
-  {
-    let hr_object = {};
-    hr_object.time = new Date(hrTable.getString(r, 0));
-    hr_object.hr = hrTable.getNum(r, 1);
-
-    heart_rate[r] = hr_object
-    print(heart_rate[r]);
-    //print(hr_object);
-
- // print(heart_rate[r].time + '::' + heart_rate[r].hr);
-  }
-
-  for (let r = 0; r < 5; r++)
-  {
-    let weather_object = {};
-
-    weather_object.datetime = weatherTable.getString(r, 1);
-    weather_object.temp = weatherTable.getNum(r, 2);
-    weather_object.feelslike = weatherTable.getNum(r, 3);
-    weather_object.dew = weatherTable.getNum(r, 4);
-    weather_object.humidity = weatherTable.getNum(r, 5);
-    weather_object.precip = weatherTable.getNum(r, 6);
-
-    weather_data[r] = weather_object;
-    print(weather_data[r]);
-    //print(hr_object);
-
- // print(heart_rate[r].time + '::' + heart_rate[r].hr);
-  }
-
 }
 
 function draw()
 {
-
-
-
   background(20);
   
   createGrid();
-  //image(gridCanvas, 0, 0)
-  
+  if(showGrid)
+  {
+    image(gridCanvas, 0, 0)
+  }
+
   let i = 0;
   for (var y = 0; y < height; y += height / 5) {
     for (var x = 0; x < width; x += width / 6) {
-      //let i = x + x * y;
-      //console.log( dCanvas[i]);
-      //dCanvas[i].background(8 * i);
-
-      //let changeY = map(mouseY, 0 , height, -108,108);
-      //dCanvas[i].rectMode(CENTER)
-      //dCanvas[i].rect( changeX+320/2,changeY+216/2, 100, 80);
-      //days[i].draw(i);
-      days[i].draw2(i,x,y);
-      
-      //image(days[i].canvas, x ,y )
+      days[i].draw(x,y);
       i++;
-
 		}
 	}
-
-
-  //image(gridCanvas, 0,0)
- 
 }
 
 
@@ -191,7 +129,7 @@ function calculateHrAvg()
     }
 
   }
-  save(exampleTable, "c:/tool/test.csv");
+  //save(exampleTable, "c:/tool/test2.csv");
 }
 
 function keyPressed() {
@@ -200,12 +138,73 @@ function keyPressed() {
   }  
 }
 
+function changeData()
+{
+  let city = dropdown.value();
+  console.log(city);
+  weatherTable = loadTable(`assets/${city}.csv`, 'csv', 'header');
+  hrTable = loadTable(`assets/${city}AvgHR.csv`, 'csv', 'header');
+  stepsTable = loadTable(`assets/${city}Steps.csv`, 'csv', 'header');
+  //resetSketch();
+  //count the columns
+  //print(hrTable.getRowCount() + ' total rows in hrTable');
+  //print(hrTable.getColumnCount() + ' total columns in hrTable');
+
+}
+
 function resetSketch()
 {
-  days = [];
+  for (let d = 0; d < 30; d++)
+  {
+    let stepsObject = {};
+    stepsObject.time = new Date(stepsTable.getString(d, 0));
+    stepsObject.steps = stepsTable.getNum(d, 1);
+
+    stepsData[d] = stepsObject;
+
+  }
+
+  for (let r = 0; r < hrTable.getRowCount(); r++)
+  {
+    let hr_object = {};
+    hr_object.time = new Date(hrTable.getString(r, 0));
+    hr_object.hr = hrTable.getNum(r, 1);
+
+    heart_rate[r] = hr_object;
+  }
+
+  for (let r = 0; r < weatherTable.getRowCount(); r++)
+  {
+    let weather_object = {};
+
+    weather_object.time = new Date(weatherTable.getString(r, 1));
+    weather_object.temp = weatherTable.getNum(r, 2);
+    weather_object.feelsLike = weatherTable.getNum(r, 3);
+    weather_object.dew = weatherTable.getNum(r, 4);
+    weather_object.humidity = weatherTable.getNum(r, 5);
+    weather_object.precip = weatherTable.getNum(r, 6);
+    weather_object.precipType = weatherTable.getString(r, 8);
+
+    weather_object.snow = weatherTable.getNum(r, 9);
+    weather_object.snowDepth = weatherTable.getNum(r, 10);
+
+    weather_object.windGust = weatherTable.getNum(r, 11);
+    weather_object.windSpeed = weatherTable.getNum(r, 12);
+    weather_object.windDir = weatherTable.getNum(r, 13);
+
+    weather_object.cloudCoverage = weatherTable.getNum(r, 15);
+    weather_object.solarEnergy = weatherTable.getNum(r, 18);
+    weather_object.uvIndex = weatherTable.getNum(r, 19);
+
+    weather_data[r] = weather_object;
+    //print(map(weather_object.humidity, 60, 100, 5, 12));
+    //print(hr_object);
+    //print(heart_rate[r].time + '::' + heart_rate[r].hr);
+  }
+
   for(let i = 0 ; i < numberOfDays; i++)
   {
-    days[i] = new Day(dayCanvasWidth, dayCanvasHeight,stepsData[i].steps, heart_rate.slice(i*24, (i*24)+24));
+    days[i] = new Day(dayCanvasWidth, dayCanvasHeight,stepsData[i].steps, heart_rate.slice(i*24, (i*24)+24), weather_data.slice(i*24, (i*24)+24));
   }
 }
 
