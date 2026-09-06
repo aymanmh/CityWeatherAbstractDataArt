@@ -22,7 +22,7 @@ class Day{
 
         for(let i = 0; i < 24;i++)
         {
-            console.log(weather[i].time.getHours());
+            //console.log(weather[i].time.getHours());
             let ang = radians(n * (this.angle + angleChange))  ;
             let r = this.scale * sqrt(n);
             

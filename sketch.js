@@ -5,6 +5,15 @@ var prev;
 let hrTable;
 let weatherTable;
 let stepsTable;
+
+let hrTableCity1;
+let weatherTableCity1;
+let stepsTableCity1;
+
+let hrTableCity2;
+let weatherTableCity2;
+let stepsTableCity2;
+
 let stepsData = [];
 let heart_rate = [];
 let weather_data = [];
@@ -12,11 +21,11 @@ let pause = false;
 let showGrid = false;
 let checkBox; 
 //res 1920×1080
-const canvasWidth = 1920;
-const canvasHeight = 1080;
+const canvasWidth = 1920*0.8;
+const canvasHeight = 1080*0.9;
 
-const dayCanvasWidth = 320;
-const dayCanvasHeight = 216;
+const dayCanvasWidth = canvasWidth * 0.16 ;
+const dayCanvasHeight = canvasHeight * 0.20;
 
 let dCanvas = [];
 let days = [];
@@ -24,23 +33,27 @@ let gridCanvas;
 
 let sel;
 
-let dropdown
-let resetButton
 const numberOfDays = 30;
 
-function preload()
-{
-   hrTable = loadTable('assets/berlinAvgHR.csv', 'csv', 'header');
-   weatherTable = loadTable('assets/berlin.csv', 'csv', 'header');
-   stepsTable = loadTable('assets/berlinSteps.csv', 'csv', 'header');
-}
+let dropdown
+let pauseButton;
 
-function setup() 
+async function setup() 
 {
-  resetButton = createButton('Reset');
-  let pauseButton = createButton('Pause');
+  
+  hrTableCity1 = await loadTable('assets/berlinAvgHR.csv', ',', 'header');
+  weatherTableCity1 = await loadTable('assets/berlin.csv', ',', 'header');
+  stepsTableCity1 = await loadTable('assets/berlinSteps.csv', ',', 'header');
 
-  resetButton.mousePressed(resetSketch);
+  hrTableCity2 = await loadTable('assets/sydneyAvgHR.csv', ',', 'header');
+  weatherTableCity2 = await loadTable('assets/sydney.csv', ',', 'header');
+  stepsTableCity2 = await loadTable('assets/sydneySteps.csv', ',', 'header');
+
+  hrTable = hrTableCity1;
+  weatherTable = weatherTableCity1
+  stepsTable = stepsTableCity1;
+
+  pauseButton = createButton('Pause');
   pauseButton.mousePressed(pauseSketch);
 
   dropdown = createSelect(); 
@@ -51,8 +64,8 @@ function setup()
   checkbox = createCheckbox('Show Grid', showGrid);
   checkbox.changed( () => { showGrid = !showGrid; } );
 
-  colorMode(HSB, 360, 100, 100, 100)
 	createCanvas(canvasWidth, canvasHeight);
+  colorMode(HSB, 360, 100, 100, 100)
   //angleMode(DEGREES);
   background(20);
 
@@ -129,7 +142,7 @@ function calculateHrAvg()
     }
 
   }
-  //save(exampleTable, "c:/tool/test2.csv");
+  //save(exampleTable, "/test2.csv");
 }
 
 function keyPressed() {
@@ -142,14 +155,19 @@ function changeData()
 {
   let city = dropdown.value();
   console.log(city);
-  weatherTable = loadTable(`assets/${city}.csv`, 'csv', 'header');
-  hrTable = loadTable(`assets/${city}AvgHR.csv`, 'csv', 'header');
-  stepsTable = loadTable(`assets/${city}Steps.csv`, 'csv', 'header');
-  //resetSketch();
-  //count the columns
-  //print(hrTable.getRowCount() + ' total rows in hrTable');
-  //print(hrTable.getColumnCount() + ' total columns in hrTable');
-
+  if(city === 'berlin')
+  {
+    hrTable = hrTableCity1;
+    weatherTable = weatherTableCity1
+    stepsTable = stepsTableCity1;
+  }
+  else if (city === 'sydney')
+  {
+    hrTable = hrTableCity2;
+    weatherTable = weatherTableCity2;
+    stepsTable = stepsTableCity2;
+  }
+  resetSketch();
 }
 
 function resetSketch()
@@ -212,7 +230,13 @@ function pauseSketch()
 {
   pause = !pause;
    if(pause)
+   {
     noLoop();
+    pauseButton.html('Resume')
+   }
   else
+  {
     loop();
+    pauseButton.html('Pause')
+  }
 }
