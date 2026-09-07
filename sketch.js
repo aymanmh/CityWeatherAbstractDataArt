@@ -53,13 +53,13 @@ async function setup()
   weatherTable = weatherTableCity1
   stepsTable = stepsTableCity1;
 
-  pauseButton = createButton('Pause');
-  pauseButton.mousePressed(pauseSketch);
-
   dropdown = createSelect(); 
   dropdown.option("berlin"); 
   dropdown.option("sydney"); 
   dropdown.changed(changeData);
+
+  pauseButton = createButton('Pause');
+  pauseButton.mousePressed(pauseSketch);
 
   checkbox = createCheckbox('Show Grid', showGrid);
   checkbox.changed( () => { showGrid = !showGrid; } );
@@ -67,7 +67,7 @@ async function setup()
 	createCanvas(canvasWidth, canvasHeight);
   colorMode(HSB, 360, 100, 100, 100)
   //angleMode(DEGREES);
-  background(20);
+  //background(20);
 
   gridCanvas = createGraphics(canvasWidth, canvasHeight );
 
