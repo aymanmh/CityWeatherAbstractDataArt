@@ -14,6 +14,10 @@ let hrTableCity2;
 let weatherTableCity2;
 let stepsTableCity2;
 
+let hrTableCity3;
+let weatherTableCity3;
+let stepsTableCity3;
+
 let stepsData = [];
 let heart_rate = [];
 let weather_data = [];
@@ -49,6 +53,10 @@ async function setup()
   weatherTableCity2 = await loadTable('assets/sydney.csv', ',', 'header');
   stepsTableCity2 = await loadTable('assets/sydneySteps.csv', ',', 'header');
 
+  hrTableCity3 = await loadTable('assets/rmlAvgHR.csv', ',', 'header');
+  weatherTableCity3 = await loadTable('assets/ramallah.csv', ',', 'header');
+  stepsTableCity3 = await loadTable('assets/rmlSteps.csv', ',', 'header');
+
   hrTable = hrTableCity1;
   weatherTable = weatherTableCity1
   stepsTable = stepsTableCity1;
@@ -56,6 +64,7 @@ async function setup()
   dropdown = createSelect(); 
   dropdown.option("berlin"); 
   dropdown.option("sydney"); 
+  dropdown.option("ramallah"); 
   dropdown.changed(changeData);
 
   pauseButton = createButton('Pause');
@@ -78,7 +87,6 @@ async function setup()
   //filter(BLUR );
 
   resetSketch();
-  //calculateHrAvg()
   pixelDensity(1);
 
   return;
@@ -86,6 +94,7 @@ async function setup()
 
 function draw()
 {
+  
   background(20);
   
   if(showGrid)
@@ -126,36 +135,6 @@ function createGrid()
 	}
 }
 
-function calculateHrAvg()
-{
-  let exampleTable = new p5.Table(); 
-  exampleTable.addColumn("time_stamp"); 
-  exampleTable.addColumn("avg_hr"); 
-
-  let sum = 0;
-  let noOfEntries = 0;
-  for(let i = 0 ; i < heart_rate.length ; i++)
-  {
-    let avg = 0;
-    let hour = heart_rate[i].time.getHours();
-    
-    sum += heart_rate[i].hr;
-    noOfEntries++;
-    
-    if(i+1 >= heart_rate.length || heart_rate[i+1].time.getHours() != hour)
-    {
-      avg = round(sum / noOfEntries);
-      //console.log(heart_rate[i].time, avg , sum , noOfEntries)
-      let newRow = exampleTable.addRow(); 
-      newRow.setString("time_stamp", heart_rate[i].time);
-      newRow.setNum("avg_hr", avg);
-      sum = 0;
-      noOfEntries = 0;
-    }
-
-  }
-  //save(exampleTable, "/test2.csv");
-}
 
 function keyPressed() {
   if (keyCode  === 80) {
@@ -165,8 +144,7 @@ function keyPressed() {
 
 function changeData()
 {
-  let city = dropdown.value();
-  console.log(city);
+  let city = dropdown.value();  
   if(city === 'berlin')
   {
     hrTable = hrTableCity1;
@@ -178,6 +156,12 @@ function changeData()
     hrTable = hrTableCity2;
     weatherTable = weatherTableCity2;
     stepsTable = stepsTableCity2;
+  }
+  else if (city === 'ramallah')
+  {
+    hrTable = hrTableCity3;
+    weatherTable = weatherTableCity3;
+    stepsTable = stepsTableCity3;
   }
   resetSketch();
 }
@@ -222,9 +206,9 @@ function resetSketch()
     weather_object.windSpeed = weatherTable.getNum(r, 12);
     weather_object.windDir = weatherTable.getNum(r, 13);
 
-    weather_object.cloudCoverage = weatherTable.getNum(r, 15);
-    weather_object.solarEnergy = weatherTable.getNum(r, 18);
-    weather_object.uvIndex = weatherTable.getNum(r, 19);
+    weather_object.cloudCoverage = weatherTable.getNum(r, 14);
+    weather_object.solarEnergy = weatherTable.getNum(r, 17);
+    weather_object.uvIndex = weatherTable.getNum(r, 18);
 
     weather_data[r] = weather_object;
     //print(map(weather_object.humidity, 60, 100, 5, 12));
