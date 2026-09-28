@@ -40,7 +40,7 @@ let pauseButton;
 
 async function setup() 
 {
-  
+
   hrTableCity1 = await loadTable('assets/berlinAvgHR.csv', ',', 'header');
   weatherTableCity1 = await loadTable('assets/berlin.csv', ',', 'header');
   stepsTableCity1 = await loadTable('assets/berlinSteps.csv', ',', 'header');
@@ -70,15 +70,17 @@ async function setup()
   //background(20);
 
   gridCanvas = createGraphics(canvasWidth, canvasHeight );
+  gridCanvas.pixelDensity(1);
 
 
-
-  frameRate(50);
+  frameRate(30);
   //noLoop();
   //filter(BLUR );
 
   resetSketch();
   //calculateHrAvg()
+  pixelDensity(1);
+
   return;
 }
 
@@ -86,9 +88,9 @@ function draw()
 {
   background(20);
   
-  createGrid();
   if(showGrid)
   {
+    createGrid();
     image(gridCanvas, 0, 0)
   }
 
@@ -99,8 +101,18 @@ function draw()
       i++;
 		}
 	}
+
+  //for debug
+  //drawDebug()
 }
 
+function drawDebug()
+{
+  fill(0);
+  textSize(20);
+  text("FPS: " + frameRate().toFixed(2), 10, 30);
+  text("PD: " + pixelDensity().toFixed(2), 10, 50);
+}
 
 function createGrid()
 {
